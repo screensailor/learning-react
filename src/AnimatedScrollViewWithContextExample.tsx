@@ -35,18 +35,19 @@ const Section = (props: { count: number }) => {
 };
 
 import Animated, { MeasuredDimensions } from "react-native-reanimated";
-import { AnimatedScrollViewContext } from "./AnimatedScrollViewWithContext";
+import {
+  AnimatedScrollViewContext,
+  AnimatedScrollViewState,
+} from "./AnimatedScrollViewWithContext";
 import React from "react";
 
 const AnimatedScrollViewDescendant: React.FC<Animated.View["props"]> = (
   props
 ) => {
-  const scrollViewContext: MeasuredDimensions | null = React.useContext(
-    AnimatedScrollViewContext
-  );
+  const scrollViewState = React.useContext(AnimatedScrollViewContext);
 
   const style = useAnimatedStyle(() => {
-    console.log("💛", _WORKLET, scrollViewContext.value);
+    console.log("💛", _WORKLET, scrollViewState?.value);
     return {};
   });
 
@@ -56,7 +57,7 @@ const AnimatedScrollViewDescendant: React.FC<Animated.View["props"]> = (
 export const AnimatedScrollViewWithContextExample = () => {
   return (
     <SafeAreaView style={style.safeArea}>
-      <AnimatedScrollViewWithContext>
+      <AnimatedScrollViewWithContext scrollEventThrottle={16}>
         <Section count={5} />
         <Section count={5} />
         <Section count={5} />

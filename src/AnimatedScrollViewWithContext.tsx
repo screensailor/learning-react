@@ -1,48 +1,66 @@
 import React from "react";
-import { LayoutChangeEvent } from "react-native";
+import { LayoutChangeEvent, NativeScrollEvent } from "react-native";
 import Animated, {
   MeasuredDimensions,
   measure,
   runOnUI,
+  useAnimatedScrollHandler,
   useAnimatedRef,
+  useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
 
-// See: https://reactnative.dev/docs/scrollview#onscroll
-export type ScrollEvent = {
-  nativeEvent: {
-    contentInset: { bottom: number; left: number; right: number; top: number };
-    contentOffset: { x: number; y: number };
-    contentSize: { height: number; width: number };
-    layoutMeasurement: { height: number; width: number };
-    zoomScale: number;
-  };
+export type AnimatedScrollViewState = {
+  scrollViewDimensions: MeasuredDimensions | undefined;
+  scrollEvent: NativeScrollEvent | undefined;
 };
 
-export type ScrollState = ScrollEvent["nativeEvent"];
 export type LayoutState = LayoutChangeEvent["nativeEvent"]["layout"];
 
-export const AnimatedScrollViewContext: React.Context<MeasuredDimensions | null> =
-  React.createContext(null);
+export const AnimatedScrollViewContext = React.createContext<
+  Animated.SharedValue<AnimatedScrollViewState> | undefined
+>(undefined);
 
 export const AnimatedScrollViewWithContext: React.FC<
   Animated.ScrollView["props"]
 > = (props) => {
   const ref = useAnimatedRef<Animated.ScrollView>();
-  const layoutMeasurement = useSharedValue<MeasuredDimensions | null>(null);
+  const scrollViewDimensions = useSharedValue<MeasuredDimensions | undefined>(
+    undefined
+  );
+  const scrollEvent = useSharedValue<NativeScrollEvent | undefined>(undefined);
+
+  const state = useDerivedValue<AnimatedScrollViewState>(() => {
+    return {
+      scrollViewDimensions: scrollViewDimensions.value,
+      scrollEvent: scrollEvent.value,
+    };
+  });
 
   const onLayout = React.useRef((_: LayoutChangeEvent) => {
     runOnUI((ref) => {
       "worklet";
       const m = measure(ref);
-      layoutMeasurement.value = m;
-      console.log("onLayout", m);
+      scrollViewDimensions.value = m;
+      //   console.log("onLayout", m);
     })(ref);
   });
 
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event: NativeScrollEvent) => {
+      //   console.log("onScroll", event);
+      scrollEvent.value = event;
+    },
+  });
+
   return (
-    <AnimatedScrollViewContext.Provider value={layoutMeasurement}>
-      <Animated.ScrollView {...props} ref={ref} onLayout={onLayout.current} />
+    <AnimatedScrollViewContext.Provider value={state}>
+      <Animated.ScrollView
+        {...props}
+        ref={ref}
+        onLayout={onLayout.current}
+        onScroll={onScroll}
+      />
     </AnimatedScrollViewContext.Provider>
   );
 };
