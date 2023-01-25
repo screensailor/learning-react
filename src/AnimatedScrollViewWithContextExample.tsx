@@ -34,11 +34,8 @@ const Section = (props: { count: number }) => {
   );
 };
 
-import Animated, { MeasuredDimensions } from "react-native-reanimated";
-import {
-  AnimatedScrollViewContext,
-  AnimatedScrollViewState,
-} from "./AnimatedScrollViewWithContext";
+import Animated from "react-native-reanimated";
+import { AnimatedScrollViewContext } from "./AnimatedScrollViewWithContext";
 import React from "react";
 
 const AnimatedScrollViewDescendant: React.FC<Animated.View["props"]> = (
@@ -47,7 +44,9 @@ const AnimatedScrollViewDescendant: React.FC<Animated.View["props"]> = (
   const scrollViewState = React.useContext(AnimatedScrollViewContext);
 
   const style = useAnimatedStyle(() => {
-    console.log("💛", _WORKLET, scrollViewState?.value);
+    const state = scrollViewState?.value;
+    if (!state) return {};
+    console.log("💛", _WORKLET, state);
     return {};
   });
 
