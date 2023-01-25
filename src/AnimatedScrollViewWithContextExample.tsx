@@ -1,5 +1,5 @@
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-import { interpolate } from "react-native-reanimated";
+import { interpolate, useAnimatedStyle } from "react-native-reanimated";
 import { AnimatedScrollViewWithContext } from "./AnimatedScrollViewWithContext";
 
 const data = (count: number = 100) =>
@@ -26,10 +26,31 @@ const Section = (props: { count: number }) => {
       }}
     >
       {data(props.count).map((item) => (
-        <Tile key={item.id} {...item} />
+        <AnimatedScrollViewDescendant key={item.id}>
+          <Tile {...item} />
+        </AnimatedScrollViewDescendant>
       ))}
     </View>
   );
+};
+
+import Animated, { MeasuredDimensions } from "react-native-reanimated";
+import { AnimatedScrollViewContext } from "./AnimatedScrollViewWithContext";
+import React from "react";
+
+const AnimatedScrollViewDescendant: React.FC<Animated.View["props"]> = (
+  props
+) => {
+  const scrollViewContext: MeasuredDimensions | null = React.useContext(
+    AnimatedScrollViewContext
+  );
+
+  const style = useAnimatedStyle(() => {
+    console.log("💛", _WORKLET, scrollViewContext.value);
+    return {};
+  });
+
+  return <Animated.View {...props} />;
 };
 
 export const AnimatedScrollViewWithContextExample = () => {
