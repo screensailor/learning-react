@@ -40,15 +40,12 @@ export const AnimatedScrollViewWithContext: React.FC<
   const onLayout = React.useRef((_: LayoutChangeEvent) => {
     runOnUI(() => {
       "worklet";
-      const m = measure(ref);
-      scrollViewDimensions.value = m;
-      //   console.log("onLayout", m);
+      scrollViewDimensions.value = measure(ref);
     })();
   });
 
   const onScroll = useAnimatedScrollHandler({
     onScroll: (event: NativeScrollEvent) => {
-      //   console.log("onScroll", event);
       scrollEvent.value = event;
     },
   });

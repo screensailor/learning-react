@@ -42,6 +42,8 @@ import Animated, {
   runOnUI,
   measure,
   MeasuredDimensions,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { AnimatedScrollViewContext } from "./AnimatedScrollViewWithContext";
 
@@ -57,38 +59,61 @@ const SlideUpOnScrollingIntoView: React.FC<Animated.View["props"]> = (
   const onLayout = React.useRef((_: LayoutChangeEvent) => {
     runOnUI(() => {
       "worklet";
-      const m = measure(ref);
-      dimensions.value = m;
-      //   console.log("onLayout", m);
+      dimensions.value = measure(ref);
     })();
   });
 
   const style = useAnimatedStyle(() => {
     const state = scrollViewState?.value;
     if (!state) return {};
-    console.log(
-      "💛",
-      _WORKLET,
-      state.scrollEvent?.contentOffset.y,
-      state.scrollViewDimensions?.pageY,
-      dimensions.value?.pageY
-    );
-    return {};
+    // console.log(
+    //   "💛",
+    //   _WORKLET,
+    //   "SCROLL OFFSET",
+    //   state.scrollEvent?.contentOffset.y ?? 0,
+    //   "SCROLL DIMENSIONS",
+    //   state.scrollViewDimensions,
+    //   "TILE DIMENSIONS",
+    //   dimensions.value
+    // );
+
+    const sd = state.scrollViewDimensions;
+    const d = dimensions.value;
+    if (!sd || !d) return {};
+    // To do: consider scale factor and scroll orientation:
+    const y = state.scrollEvent?.contentOffset.y ?? 0;
+    const bottomY = sd.height + sd.pageY;
+    const tileY = d.pageY - y;
+    const didEnter = tileY < bottomY;
+    const offsetY = sd.width / 2;
+    return {
+      transform: [
+        {
+          translateX: withSpring(didEnter ? 0 : offsetY),
+        },
+      ],
+    };
   });
 
-  return <Animated.View {...props} ref={ref} onLayout={onLayout.current} />;
+  return (
+    <Animated.View
+      {...props}
+      ref={ref}
+      onLayout={onLayout.current}
+      style={style}
+    />
+  );
 };
 
 export const AnimatedScrollViewWithContextExample = () => {
   return (
     <SafeAreaView style={style.safeArea}>
       <AnimatedScrollViewWithContext scrollEventThrottle={16}>
-        <Section count={5} />
-        <Section count={5} />
-        <Section count={5} />
-        <Section count={5} />
-        <Section count={5} />
-        <Section count={5} />
+        {Array(10)
+          .fill(null)
+          .map((_, i) => (
+            <Section key={i} count={5} />
+          ))}
       </AnimatedScrollViewWithContext>
     </SafeAreaView>
   );
