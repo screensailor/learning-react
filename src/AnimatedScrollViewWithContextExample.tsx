@@ -26,31 +26,57 @@ const Section = (props: { count: number }) => {
       }}
     >
       {data(props.count).map((item) => (
-        <AnimatedScrollViewDescendant key={item.id}>
+        <SlideUpOnScrollingIntoView key={item.id}>
           <Tile {...item} />
-        </AnimatedScrollViewDescendant>
+        </SlideUpOnScrollingIntoView>
       ))}
     </View>
   );
 };
 
-import Animated from "react-native-reanimated";
-import { AnimatedScrollViewContext } from "./AnimatedScrollViewWithContext";
 import React from "react";
+import { LayoutChangeEvent } from "react-native";
+import Animated, {
+  useAnimatedRef,
+  useSharedValue,
+  runOnUI,
+  measure,
+  MeasuredDimensions,
+} from "react-native-reanimated";
+import { AnimatedScrollViewContext } from "./AnimatedScrollViewWithContext";
 
-const AnimatedScrollViewDescendant: React.FC<Animated.View["props"]> = (
+const SlideUpOnScrollingIntoView: React.FC<Animated.View["props"]> = (
   props
 ) => {
+  const ref = useAnimatedRef<Animated.View>();
+
   const scrollViewState = React.useContext(AnimatedScrollViewContext);
+
+  const dimensions = useSharedValue<MeasuredDimensions | undefined>(undefined);
+
+  const onLayout = React.useRef((_: LayoutChangeEvent) => {
+    runOnUI(() => {
+      "worklet";
+      const m = measure(ref);
+      dimensions.value = m;
+      //   console.log("onLayout", m);
+    })();
+  });
 
   const style = useAnimatedStyle(() => {
     const state = scrollViewState?.value;
     if (!state) return {};
-    console.log("💛", _WORKLET, state);
+    console.log(
+      "💛",
+      _WORKLET,
+      state.scrollEvent?.contentOffset.y,
+      state.scrollViewDimensions?.pageY,
+      dimensions.value?.pageY
+    );
     return {};
   });
 
-  return <Animated.View {...props} />;
+  return <Animated.View {...props} ref={ref} onLayout={onLayout.current} />;
 };
 
 export const AnimatedScrollViewWithContextExample = () => {

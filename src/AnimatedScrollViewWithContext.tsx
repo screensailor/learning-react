@@ -38,12 +38,12 @@ export const AnimatedScrollViewWithContext: React.FC<
   });
 
   const onLayout = React.useRef((_: LayoutChangeEvent) => {
-    runOnUI((ref) => {
+    runOnUI(() => {
       "worklet";
       const m = measure(ref);
       scrollViewDimensions.value = m;
       //   console.log("onLayout", m);
-    })(ref);
+    })();
   });
 
   const onScroll = useAnimatedScrollHandler({
