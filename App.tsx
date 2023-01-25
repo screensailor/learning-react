@@ -1,5 +1,6 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
-import Animated, { interpolate } from "react-native-reanimated";
+import { interpolate } from "react-native-reanimated";
+import { AnimatedScrollViewWithContext } from "./src/AnimatedScrollViewWithContext";
 
 const data = Array(100)
   .fill(null)
@@ -17,11 +18,11 @@ const Tile = (props: Text["props"] & typeof data[number]) => (
 export default function App() {
   return (
     <SafeAreaView>
-      <ScrollView style={style.scrollView}>
+      <AnimatedScrollViewWithContext style={style.scrollView}>
         {data.map((item) => (
           <Tile key={item.id} {...item} />
         ))}
-      </ScrollView>
+      </AnimatedScrollViewWithContext>
     </SafeAreaView>
   );
 }
@@ -31,7 +32,7 @@ const style = StyleSheet.create({
     padding: 20,
   },
   tile: {
-    backgroundColor: "dogerblue",
+    backgroundColor: "dodgerblue",
     color: "white",
     marginTop: 20,
     textAlign: "center",
