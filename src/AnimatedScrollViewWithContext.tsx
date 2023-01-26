@@ -63,6 +63,7 @@ export const AnimatedScrollViewWithContext: React.FC<
       <Animated.ScrollView
         {...props}
         ref={ref}
+        scrollEventThrottle={props.scrollEventThrottle ?? 16}
         onLayout={onLayout.current}
         onScroll={onScroll}
       />

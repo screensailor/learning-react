@@ -43,7 +43,7 @@ export const AnimatedScrollViewWithContextExample = () => {
   return (
     <SafeAreaView style={style.safeArea}>
       <View style={{ padding: 0 }}>
-        <AnimatedScrollViewWithContext scrollEventThrottle={16}>
+        <AnimatedScrollViewWithContext>
           {Array(10)
             .fill(null)
             .map((_, i) => (
