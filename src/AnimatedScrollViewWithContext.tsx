@@ -1,11 +1,18 @@
+/*
+    To do:
+    - Consider scale factor and scroll orientation when calculating didEnterFromBottom
+    - Make it unnecessary for the user to declare 'worklet' in the createAnimatedStyle function
+    - Namespace the types - e.g. Animated.ScrollViewWithContext
+*/
 import React from "react";
-import { LayoutChangeEvent, NativeScrollEvent } from "react-native";
+import { LayoutChangeEvent, NativeScrollEvent, ViewStyle } from "react-native";
 import Animated, {
   MeasuredDimensions,
   measure,
   runOnUI,
   useAnimatedScrollHandler,
   useAnimatedRef,
+  useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
@@ -59,5 +66,71 @@ export const AnimatedScrollViewWithContext: React.FC<
         onScroll={onScroll}
       />
     </AnimatedScrollViewContext.Provider>
+  );
+};
+
+/*
+    AnimatedableScrollViewDescendant
+*/
+
+export const didEnterFromBottom: (
+  context: AnimatedScrollViewDescendantContext
+) => boolean = ({ scrollEvent, scrollViewDimensions, ownDimensions }) => {
+  "worklet";
+  const y = scrollEvent?.contentOffset.y ?? 0;
+  const bottomY = scrollViewDimensions.height + scrollViewDimensions.pageY;
+  const tileY = ownDimensions.pageY - y;
+  return tileY < bottomY;
+};
+
+export type AnimatedScrollViewDescendantContext = {
+  scrollEvent: NativeScrollEvent | undefined;
+  scrollViewDimensions: MeasuredDimensions;
+  ownDimensions: MeasuredDimensions;
+};
+
+export type CreateAnimatedStyle = (
+  context: AnimatedScrollViewDescendantContext
+) => Animated.AnimateStyle<ViewStyle>;
+
+export type AnimatableScrollViewDescendantProps = Animated.View["props"] & {
+  createAnimatedStyle: CreateAnimatedStyle;
+};
+
+export const AnimatableScrollViewDescendant: React.FC<
+  AnimatableScrollViewDescendantProps
+> = (props) => {
+  const ref = useAnimatedRef<Animated.View>();
+  const scrollViewState = React.useContext(AnimatedScrollViewContext);
+  const ownDimensions = useSharedValue<MeasuredDimensions | undefined>(
+    undefined
+  );
+
+  const onLayout = React.useRef((_: LayoutChangeEvent) => {
+    runOnUI(() => {
+      "worklet";
+      ownDimensions.value = measure(ref);
+    })();
+  });
+
+  const style = useAnimatedStyle(() => {
+    const state = scrollViewState?.value;
+    const sd = state?.scrollViewDimensions;
+    const od = ownDimensions.value;
+    if (!sd || !od) return {};
+    return props.createAnimatedStyle({
+      scrollEvent: state.scrollEvent,
+      scrollViewDimensions: sd,
+      ownDimensions: od,
+    });
+  });
+
+  return (
+    <Animated.View
+      {...props}
+      ref={ref}
+      onLayout={onLayout.current}
+      style={style}
+    />
   );
 };
