@@ -132,7 +132,7 @@ export const AnimatableScrollViewDescendant: React.FC<
       {...props}
       ref={ref}
       onLayout={onLayout.current}
-      style={style}
+      style={[props.style, style]}
     />
   );
 };
