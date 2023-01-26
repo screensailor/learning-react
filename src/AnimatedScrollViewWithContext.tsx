@@ -3,6 +3,7 @@
     - Consider scale factor and scroll orientation when calculating didEnterFromBottom
     - Make it unnecessary for the user to declare 'worklet' in the createAnimatedStyle function
     - Namespace the types - e.g. Animated.ScrollViewWithContext
+    - Add createAnimatedProps
 */
 import React from "react";
 import { LayoutChangeEvent, NativeScrollEvent, ViewStyle } from "react-native";
