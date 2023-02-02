@@ -1,4 +1,4 @@
-import { AnimatedScrollViewWithContextExample } from "./src/AnimatedScrollViewWithContextExample";
+import { AnimatedScrollViewWithContextExample } from "./src/AnimatedScrollViewExample";
 
 const App = () => {
   return <AnimatedScrollViewWithContextExample />;
